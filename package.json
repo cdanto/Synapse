@@ -1,0 +1,28 @@
+{
+  "name": "synapse",
+  "version": "1.0.0",
+  "description": "Synapse - Local-first AI chat assistant",
+  "main": "api/index.py",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod",
+    "build": "echo 'No build step required for Python'"
+  },
+  "keywords": [
+    "ai",
+    "chat",
+    "assistant",
+    "local",
+    "private",
+    "fastapi",
+    "python"
+  ],
+  "author": "Synapse Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "vercel": "latest"
+  }
+}
