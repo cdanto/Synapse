@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>my_friend • Local Chat</title>
+  <style>
+    :root{
+      --bg:#fff; --text:#0f172a; --muted:#64748b; --panel:#ffffff; --border:#e5e7eb;
+      --pill:#fff; --shadow:0 10px 30px rgba(16,24,40,.12), 0 2px 6px rgba(16,24,40,.08);
+      --user:#eef2ff; --assistant:#f8fafc;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --bg:#0b0c10; --text:#e5e7eb; --muted:#94a3b8; --panel:#0f1115; --border:#1f2937;
+        --pill:#111318; --shadow:0 12px 40px rgba(0,0,0,.45), 0 2px 10px rgba(0,0,0,.25);
+        --user:#111827; --assistant:#0f1115;
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text);
+      background:
+        radial-gradient(1200px 900px at 20% 10%, #ffd7e3 0%, transparent 55%),
+        radial-gradient(1100px 800px at 80% 20%, #ffe8b0 0%, transparent 60%),
+        radial-gradient(1000px 900px at 50% 80%, #cde3ff 0%, transparent 60%),
+        linear-gradient(180deg, #fff, #f8fafc);
+      background-attachment:fixed;
+      display:flex; flex-direction:column;
+      min-height:100vh;
+    }
+    header{
+      padding:18px 20px;
+      display:flex; align-items:center; gap:10px;
+    }
+    header h1{ font:600 18px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; margin:0 }
+    header .muted{ color:var(--muted); font-size:14px }
+    main{
+      flex:1; display:flex; justify-content:center;
+    }
+    .container{
+      width:min(980px,92vw);
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .chat{
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:16px; padding:12px;
+      min-height:50vh; max-height:65vh; overflow:auto;
+      box-shadow:var(--shadow);
+    }
+    .msg{ display:flex; gap:10px; padding:10px 12px; border-radius:12px; margin:6px 0; }
+    .msg.user{ background:var(--user); }
+    .msg.assistant{ background:var(--assistant); }
+    .role{ font-weight:600; font-size:13px; color:var(--muted); margin-bottom:4px }
+    .content{ white-space:pre-wrap; word-wrap:break-word; }
+    details.rag{
+      background:var(--panel); border:1px dashed var(--border);
+      border-radius:12px; padding:10px 12px;
+    }
+    details.rag summary{ cursor:pointer; color:var(--muted) }
+    .inputbar{
+      position:sticky; bottom:0; padding:10px 0 18px; background:transparent;
+    }
+    .bar{
+      display:flex; align-items:center; gap:10px;
+      background:var(--pill); border:1px solid var(--border); border-radius:999px;
+      padding:10px 12px; box-shadow:var(--shadow);
+    }
+    textarea{
+      resize:none; border:0; outline:0; background:transparent; color:var(--text);
+      flex:1; min-height:52px; max-height:160px; padding:8px 4px; font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    }
+    button{
+      border:1px solid var(--border); background:transparent; color:var(--text);
+      border-radius:999px; height:44px; padding:0 16px; cursor:pointer;
+    }
+    button.primary{ background:#111827; color:#fff; border-color:#111827 }
+    .hint{ text-align:center; color:var(--muted); font-size:12px; margin-top:6px }
+    .pill{
+      border:1px solid var(--border); border-radius:999px; padding:4px 10px; font-size:12px; color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>my_friend</h1>
+    <div class="muted">private, on-device assistant</div>
+    <div style="flex:1"></div>
+    <span class="pill" id="status">idle</span>
+  </header>
+
+  <main>
+    <div class="container">
+      <div id="chat" class="chat" aria-live="polite"></div>
+
+      <details id="ragBox" class="rag" open>
+        <summary>RAG preview</summary>
+        <pre id="rag" style="margin:8px 0; white-space:pre-wrap"></pre>
+      </details>
+
+      <div class="inputbar">
+        <div class="bar">
+          <textarea id="msg" placeholder="Ask anything…  (Enter = send • Shift+Enter = newline)"></textarea>
+          <button id="send" class="primary">Send</button>
+        </div>
+        <div class="hint">Tip: toggle RAG on the backend or add it per-turn if your endpoint supports it.</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ======= Config =======
+    const BASE = localStorage.getItem('mf_base') || 'http://127.0.0.1:8000'; // change to :9000 if needed
+    const USE_SSE = true; // try SSE first, fall back to non-streaming
+
+    // ======= DOM helpers =======
+    const el = (sel) => document.querySelector(sel);
+    const chat = el('#chat'), rag = el('#rag'), msg = el('#msg'), sendBtn = el('#send'), statusPill = el('#status');
+
+    function addMessage(role, content, sources=null){
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
+      const inner = document.createElement('div');
+      const r = document.createElement('div');
+      r.className = 'role'; r.textContent = role === 'user' ? 'You' : 'Assistant';
+      const c = document.createElement('div');
+      c.className = 'content'; c.textContent = content || '';
+      inner.appendChild(r); inner.appendChild(c);
+      wrap.appendChild(inner);
+
+      if (role === 'assistant' && Array.isArray(sources) && sources.length){
+        const src = document.createElement('div');
+        src.className = 'content';
+        src.style.cssText = 'margin-top:6px; font-size:13px; color: var(--muted)';
+        src.textContent = 'Sources: ' + sources.map(s => (s.title || s.source || '')).filter(Boolean).join(', ');
+        inner.appendChild(src);
+      }
+
+      chat.appendChild(wrap);
+      chat.scrollTop = chat.scrollHeight;
+      return c; // return the content container so we can stream into it
+    }
+
+    function setStatus(s){ statusPill.textContent = s; }
+
+    // ======= RAG preview =======
+    async function previewRAG(q){
+      rag.textContent = 'Loading…';
+      try{
+        const r = await fetch(`${BASE}/rag/preview?q=` + encodeURIComponent(q));
+        const data = await r.json();
+        rag.textContent = data.context || (data.preview || '');
+        if (!rag.textContent) rag.textContent = '(no context returned)';
+      }catch(e){
+        rag.textContent = `RAG error: ${e}`;
+      }
+    }
+
+    // ======= Chat (SSE streaming with fallback) =======
+    async function sendMessage(q){
+      setStatus('thinking…');
+      // show user bubble
+      addMessage('user', q);
+
+      // RAG preview (non-blocking)
+      previewRAG(q).catch(()=>{});
+
+      // assistant bubble we will stream into
+      const assistantNode = addMessage('assistant', '');
+
+      // Try SSE first
+      if (USE_SSE) {
+        try{
+          const url = new URL(`${BASE}/chat/stream`);
+          // minimal payload encoded into query (works with GET-only SSE)
+          url.searchParams.set('q', q);
+          // if your backend expects JSON messages, you can add: url.searchParams.set('messages', JSON.stringify(history));
+          const es = new EventSource(url, { withCredentials: false });
+          let full = '', sources = null;
+
+          es.onmessage = (ev) => {
+            try{
+              const obj = JSON.parse(ev.data);
+              if (obj.delta){ full += obj.delta; assistantNode.textContent = full; chat.scrollTop = chat.scrollHeight; }
+              if (obj.sources){ sources = obj.sources; }
+              if (obj.done){
+                es.close();
+                if (sources){ addMessageMetaToLast(assistantNode, sources); }
+                setStatus('idle');
+              }
+            }catch{
+              // if not JSON, treat as raw delta
+              full += ev.data;
+              assistantNode.textContent = full;
+            }
+          };
+          es.onerror = () => { es.close(); fallbackPOST(q, assistantNode); };
+          return;
+        }catch(e){
+          // fall back below
+        }
+      }
+
+      // Fallback: non-streaming POST
+      fallbackPOST(q, assistantNode);
+    }
+
+    async function fallbackPOST(q, assistantNode){
+      try{
+        const r = await fetch(`${BASE}/chat`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ message: q })
+        });
+        const data = await r.json();
+        assistantNode.textContent = data.reply || data.text || '(no reply)';
+        if (data.sources){ addMessageMetaToLast(assistantNode, data.sources); }
+      }catch(e){
+        assistantNode.textContent = `Error: ${e}`;
+      }finally{
+        setStatus('idle');
+      }
+    }
+
+    function addMessageMetaToLast(node, sources){
+      if (!Array.isArray(sources) || !sources.length) return;
+      const meta = document.createElement('div');
+      meta.className = 'content';
+      meta.style.cssText = 'margin-top:6px; font-size:13px; color: var(--muted)';
+      meta.textContent = 'Sources: ' + sources.map(s => (s.title || s.source || '')).filter(Boolean).join(', ');
+      node.parentElement.appendChild(meta);
+    }
+
+    // ======= Wire UI =======
+    function submit(){
+      const q = msg.value.trim();
+      if (!q) return;
+      msg.value = '';
+      sendMessage(q);
+    }
+
+    sendBtn.addEventListener('click', submit);
+    msg.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        submit();
+      }
+    });
+
+    // First focus for fast typing
+    msg.focus();
+  </script>
+</body>
+</html>

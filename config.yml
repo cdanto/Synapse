@@ -1,0 +1,5 @@
+model_id: Qwen/Qwen2.5-7B-Instruct
+storage_dir: ./seed_storage
+work_dir: ./workdir
+archive_name: seed_core_archive.tar
+encrypted_name: seed_core_encrypted.tar.enc
