@@ -27,7 +27,7 @@ app = FastAPI(title="Synapse Cloud Backend", version="1.0.0")
 cors_origins_env = os.environ.get("CORS_ORIGINS", "")
 allow_origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()] or [
     "http://localhost:3000",
-    "https://your-vercel-app.vercel.app",  # Update with your Vercel domain
+    "https://your-railway-app.railway.app",  # Update with your Railway domain
 ]
 app.add_middleware(
     CORSMiddleware,
