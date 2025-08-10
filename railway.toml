@@ -1,0 +1,17 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "pip install --no-cache-dir -r railway-requirements.txt && uvicorn backend.app:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[build.environment]
+NIXPACKS_PYTHON_VERSION = "3.11"
+NIXPACKS_PIP_VERSION = "23.0"
+
+# Use ultra-minimal build requirements to stay well under 4GB limit
+[build.scripts]
+build = "pip install --no-cache-dir -r railway-build-requirements.txt"

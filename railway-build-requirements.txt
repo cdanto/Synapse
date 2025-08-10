@@ -1,0 +1,13 @@
+# Ultra-minimal build requirements for Railway
+# This keeps the build image well under 4GB limit
+
+# Core FastAPI dependencies only
+fastapi>=0.110.0
+uvicorn>=0.29.0
+python-multipart>=0.0.9
+python-dotenv>=1.1.0
+requests>=2.32.0
+pydantic>=2.0.0
+
+# Note: Heavy ML dependencies (sentence-transformers, torch, etc.)
+# are replaced with external embedding APIs to stay under 4GB

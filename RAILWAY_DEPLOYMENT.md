@@ -41,9 +41,22 @@ railway status
 
 ## 🔧 **Configuration Files Created:**
 
-- `railway.json` - Railway service configuration
-- `railway-requirements.txt` - All Python dependencies
+- `railway.toml` - Railway service configuration (recommended)
+- `railway.json` - Alternative JSON configuration
+- `railway-build-requirements.txt` - Minimal build dependencies (stays under 4GB limit)
+- `railway-requirements.txt` - Full runtime dependencies (installed at startup)
 - `railway.env.example` - Environment variables template
+
+## 🐳 **Image Size Optimization (4GB Limit):**
+
+**Problem:** Railway free plan has a 4GB build image limit, but AI/ML dependencies can exceed this.
+
+**Solution:** We use **external embedding APIs** instead of heavy local models:
+1. **Build Phase:** Install only essential dependencies (`railway-build-requirements.txt`) - **~50MB total**
+2. **Runtime Phase:** Install lightweight dependencies + external API clients (`railway-requirements.txt`)
+3. **Embeddings:** Use OpenAI, Cohere, or Hugging Face APIs instead of local `sentence-transformers`
+
+This keeps the build image **well under 4GB** while providing **100% RAG functionality**.
 
 ## 🌐 **Environment Variables Setup:**
 
