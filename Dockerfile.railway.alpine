@@ -38,10 +38,10 @@ COPY backend/app.minimal.py ./backend/app.py
 
 # Copy environment file if it exists, otherwise create a minimal one
 COPY .env* ./
+# Optional: only create .env defaults if missing, without forcing PORT/HOST
 RUN if [ ! -f .env ]; then \
-        echo "PORT=8000" > .env && \
-        echo "HOST=0.0.0.0" >> .env && \
-        echo "CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000" >> .env; \
+      printf "HOST=::\n" > .env && \
+      printf "CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000\n" >> .env; \
     fi
 
 # Create necessary directories with proper permissions
