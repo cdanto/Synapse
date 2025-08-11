@@ -1,0 +1,54 @@
+# Ultra-minimal Railway deployment using Alpine Linux
+FROM python:3.11-alpine as builder
+
+# Install only essential build dependencies
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    libffi-dev \
+    && rm -rf /var/cache/apk/*
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy and install ultra-minimal requirements
+COPY railway-requirements-ultra-minimal.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r railway-requirements-ultra-minimal.txt
+
+# Production stage
+FROM python:3.11-alpine
+
+# Install only runtime dependencies
+RUN apk add --no-cache \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Set working directory
+WORKDIR /app
+
+# Copy only the minimal backend app (no heavy dependencies)
+COPY backend/app.minimal.py ./backend/app.py
+COPY .env ./
+
+# Create necessary directories with proper permissions
+RUN mkdir -p workdir/logs workdir/docs && \
+    chown -R nobody:nobody workdir
+
+# Switch to non-root user for security
+USER nobody
+
+# Expose port
+EXPOSE 8000
+
+# Health check with better timeout handling
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Start command with optimized uvicorn settings
+CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--log-level", "info"]

@@ -1,0 +1,127 @@
+# Ultra-aggressive dockerignore for Alpine Railway build
+# Only include the absolute minimum files
+
+# Git and version control
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Virtual environments
+.venv
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+workdir/
+logs/
+*.log
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Frontend (not needed for backend)
+frontend/
+synapse-frontend/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+dist/
+build/
+
+# Documentation
+*.md
+docs/
+README.md
+LICENSE
+MIGRATION_PLAN.md
+QUICK_START.md
+RAILWAY_DEPLOYMENT.md
+RAILWAY_4GB_OPTIMIZATION.md
+
+# Scripts
+scripts/
+*.sh
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test files
+test-*.py
+*_test.py
+tests/
+
+# Development files
+.env.example
+railway.env.example
+railway-requirements.txt
+railway-requirements-minimal.txt
+railway-build-requirements.txt
+deploy-*.sh
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Docker files (except the one we need)
+Dockerfile
+Dockerfile.railway
+.dockerignore
+.dockerignore.railway
+
+# Backend files we don't need
+backend/chat_core/
+backend/cloud_app.py
+backend/external_embeddings.py
+backend/requirements.txt
+chat_core/
+chat_stream.py
+guard_proxy.py
+persona.json
+config.yml

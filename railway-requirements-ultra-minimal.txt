@@ -1,0 +1,21 @@
+# Ultra-minimal Railway requirements for Synapse
+# Only the absolute minimum to stay under 4GB
+
+# Core FastAPI dependencies (minimal versions)
+fastapi==0.110.0
+uvicorn==0.29.0
+python-multipart==0.0.9
+python-dotenv==1.1.0
+
+# Essential utilities (minimal)
+requests==2.32.0
+pydantic==2.0.0
+
+# Note: Removed ALL heavy dependencies:
+# - No FAISS (vector database)
+# - No document processing libraries
+# - No heavy ML libraries
+# - No file handling libraries
+
+# This will require modifying the backend to use external services
+# instead of local processing
