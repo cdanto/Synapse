@@ -1,3 +1,6 @@
+# Docker ignore for Railway deployment
+# Exclude unnecessary files to reduce build context
+
 # Git and version control
 .git
 .gitignore
@@ -32,14 +35,14 @@ ENV/
 env/
 .venv/
 
-# IDE
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -57,24 +60,43 @@ logs/
 .env.test
 .env.production
 
-# Frontend (not needed for backend)
-frontend/
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Frontend build artifacts
+synapse-frontend/node_modules/
+synapse-frontend/.next/
+synapse-frontend/out/
+synapse-frontend/build/
+synapse-frontend/dist/
 
-# Documentation
+# Documentation and scripts
 *.md
-docs/
-README.md
-LICENSE
-
-# Scripts
 scripts/
-*.sh
+deploy-*.sh
+RAILWAY_*.md
+MIGRATION_PLAN.md
+QUICK_START.md
 
-# Temporary files
-*.tmp
-*.temp
-.cache/
+# Test files
+test-*.py
+*_test.py
+tests/
+
+# Old requirements files
+railway-requirements.txt
+railway-requirements-minimal.txt
+railway-build-requirements.txt
+
+# Docker files (except the one we're using)
+Dockerfile
+Dockerfile.railway
+Dockerfile.railway.alpine
+
+# Railway config (except the one we're using)
+railway.toml
+railway.json
+
+# Local development files
+app.py
+chat_stream.py
+guard_proxy.py
+config.yml
+persona.json

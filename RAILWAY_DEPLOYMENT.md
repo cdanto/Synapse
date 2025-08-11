@@ -44,7 +44,7 @@ railway status
 - `railway.toml` - Railway service configuration (recommended)
 - `railway.json` - Alternative JSON configuration
 - `railway-build-requirements.txt` - Minimal build dependencies (stays under 4GB limit)
-- `railway-requirements.txt` - Full runtime dependencies (installed at startup)
+- `railway-requirements-ultra-minimal.txt` - Ultra-minimal runtime dependencies (installed at startup)
 - `railway.env.example` - Environment variables template
 
 ## 🐳 **Image Size Optimization (4GB Limit):**
@@ -53,7 +53,7 @@ railway status
 
 **Solution:** We use **external embedding APIs** instead of heavy local models:
 1. **Build Phase:** Install only essential dependencies (`railway-build-requirements.txt`) - **~50MB total**
-2. **Runtime Phase:** Install lightweight dependencies + external API clients (`railway-requirements.txt`)
+2. **Runtime Phase:** Install ultra-minimal dependencies (`railway-requirements-ultra-minimal.txt`)
 3. **Embeddings:** Use OpenAI, Cohere, or Hugging Face APIs instead of local `sentence-transformers`
 
 This keeps the build image **well under 4GB** while providing **100% RAG functionality**.
@@ -96,7 +96,7 @@ Synapse/
 │   ├── chat_core/          # Core chat functionality
 │   └── requirements.txt    # Backend dependencies
 ├── railway.json            # Railway configuration
-├── railway-requirements.txt # Railway dependencies
+├── railway-requirements-ultra-minimal.txt # Railway ultra-minimal dependencies
 └── railway.env.example     # Environment template
 ```
 
@@ -194,7 +194,7 @@ curl -X POST https://your-app.railway.app/chat/stream \
 
 ### **Common Issues:**
 
-1. **Build Failures**: Check `railway-requirements.txt` for missing dependencies
+1. **Build Failures**: Check `railway-requirements-ultra-minimal.txt` for missing dependencies
 2. **Import Errors**: Ensure all Python packages are in requirements
 3. **Port Issues**: Railway sets `$PORT` environment variable automatically
 4. **Memory Issues**: Railway provides adequate memory for AI workloads
