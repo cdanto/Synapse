@@ -31,13 +31,13 @@ find . -name "*.pyc" -delete
 find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 
 # Check if we're in the right directory
-if [ ! -f "Dockerfile.railway" ]; then
-    echo "❌ Dockerfile.railway not found. Please run this script from the project root."
+if [ ! -f "Dockerfile.railway.alpine" ]; then
+    echo "❌ Dockerfile.railway.alpine not found. Please run this script from the project root."
     exit 1
 fi
 
-if [ ! -f "railway-requirements-minimal.txt" ]; then
-    echo "❌ railway-requirements-minimal.txt not found. Please run this script from the project root."
+if [ ! -f "railway-requirements-ultra-minimal.txt" ]; then
+    echo "❌ railway-requirements-ultra-minimal.txt not found. Please run this script from the project root."
     exit 1
 fi
 
@@ -45,8 +45,8 @@ echo "✅ All required files found"
 
 # Deploy to Railway
 echo "🚂 Deploying to Railway..."
-echo "   Using: Dockerfile.railway"
-echo "   Requirements: railway-requirements-minimal.txt"
+echo "   Using: Dockerfile.railway.alpine"
+echo "   Requirements: railway-requirements-ultra-minimal.txt"
 echo "   Target: 4GB limit"
 
 # Deploy with the optimized configuration
