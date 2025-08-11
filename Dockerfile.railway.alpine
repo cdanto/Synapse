@@ -6,16 +6,17 @@ RUN apk add --no-cache \
     gcc \
     musl-dev \
     libffi-dev \
+    linux-headers \
     && rm -rf /var/cache/apk/*
 
 # Create virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy and install ultra-minimal requirements
+# Copy and install ultra-minimal requirements with better error handling
 COPY railway-requirements-ultra-minimal.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r railway-requirements-ultra-minimal.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r railway-requirements-ultra-minimal.txt --verbose
 
 # Production stage
 FROM python:3.11-alpine

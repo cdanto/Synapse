@@ -1,15 +1,16 @@
 # Ultra-minimal Railway requirements for Synapse
 # Only the absolute minimum to stay under 4GB
+# Alpine Linux compatible versions
 
-# Core FastAPI dependencies (minimal versions)
-fastapi==0.110.0
-uvicorn==0.29.0
-python-multipart==0.0.9
-python-dotenv==1.1.0
+# Core FastAPI dependencies (Alpine compatible)
+fastapi>=0.104.0,<0.111.0
+uvicorn[standard]>=0.24.0,<0.30.0
+python-multipart>=0.0.6,<0.1.0
+python-dotenv>=1.0.0,<2.0.0
 
-# Essential utilities (minimal)
-requests==2.32.0
-pydantic==2.0.0
+# Essential utilities (Alpine compatible)
+requests>=2.31.0,<3.0.0
+pydantic>=2.0.0,<3.0.0
 
 # Note: Removed ALL heavy dependencies:
 # - No FAISS (vector database)
