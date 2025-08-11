@@ -55,10 +55,11 @@ Thumbs.db
 workdir/
 logs/
 *.log
-.env.local
-.env.development
-.env.test
-.env.production
+# Keep .env files for Railway deployment
+# .env.local
+# .env.development
+# .env.test
+# .env.production
 
 # Frontend build artifacts
 synapse-frontend/node_modules/
